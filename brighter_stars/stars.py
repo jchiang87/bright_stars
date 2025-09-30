@@ -4,13 +4,20 @@ be increased by a delta magnitude value set in the yaml config.
 """
 import galsim
 from skycatalogs.objects import BaseObject, ObjectCollection
+from skycatalogs.objects.star_object import StarObject
 
 __all__ = ["BrighterStarsObject", "BrighterStarsCollection"]
 
 
 class BrighterStarsObject(BaseObject):
 
-    def __init__(self, star_object, delta_magnorm):
+    def __init__(self, star_object, delta_magnorm, parent_collection,
+                 index):
+        self._belongs_to = parent_collection
+        self._belongs_index = index
+        self._id = "brighter_star_" + star_object.id
+        self._ra = star_object.ra
+        self._dec = star_object.dec
         self.star_object = star_object
         self.delta_magnorm = delta_magnorm
 
@@ -32,6 +39,7 @@ class BrighterStarsCollection(ObjectCollection):
     _object_type = "brighter_stars"
 
     def __init__(self, collection_list, delta_magnorm):
+        self._object_type_unique = self._object_type
         self.collection_list = collection_list
         self.delta_magnorm = delta_magnorm
 
@@ -41,7 +49,9 @@ class BrighterStarsCollection(ObjectCollection):
 
     def __getitem__(self, key):
         results = self.collection_list.__getitem__(key)
-        return [BrighterStarsObject(_, self.delta_magnorm) for _ in results]
+        if isinstance(results, StarObject):
+            return BrighterStarsObject(results, self.delta_magnorm, self, key)
+        raise RuntimeError("expected StarObject")
 
     def __len__(self):
         return self.collection_list._total_len
