@@ -1,0 +1,12 @@
+catalog_dir: .
+catalog_name: skyCatalog
+object_types:
+  brighter_stars:
+    area_partition: None
+    module: brighter_stars
+    collection_class: BrighterStarsCollection
+    delta_magnorm: -3.0
+skycatalog_root: .
+provenance:
+  versioning:
+    schema_version: 1.3.0
