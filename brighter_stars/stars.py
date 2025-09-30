@@ -11,8 +11,7 @@ __all__ = ["BrighterStarsObject", "BrighterStarsCollection"]
 
 class BrighterStarsObject(BaseObject):
 
-    def __init__(self, star_object, delta_magnorm, parent_collection,
-                 index):
+    def __init__(self, star_object, delta_magnorm, parent_collection, index):
         self._belongs_to = parent_collection
         self._belongs_index = index
         self._id = "brighter_star_" + star_object.id
@@ -38,9 +37,9 @@ class BrighterStarsObject(BaseObject):
 class BrighterStarsCollection(ObjectCollection):
     _object_type = "brighter_stars"
 
-    def __init__(self, collection_list, delta_magnorm):
+    def __init__(self, object_list, delta_magnorm):
         self._object_type_unique = self._object_type
-        self.collection_list = collection_list
+        self.object_list = object_list
         self.delta_magnorm = delta_magnorm
 
     @property
@@ -48,13 +47,13 @@ class BrighterStarsCollection(ObjectCollection):
         return ()
 
     def __getitem__(self, key):
-        results = self.collection_list.__getitem__(key)
-        if isinstance(results, StarObject):
-            return BrighterStarsObject(results, self.delta_magnorm, self, key)
-        raise RuntimeError("expected StarObject")
+        star_object = self.object_list[key]
+        if not isinstance(star_object, StarObject):
+            raise RuntimeError("expected StarObject")
+        return BrighterStarsObject(star_object, self.delta_magnorm, self, key)
 
     def __len__(self):
-        return self.collection_list._total_len
+        return self.object_list._total_len
 
     @staticmethod
     def register(sky_catalog, object_type):
@@ -69,5 +68,5 @@ class BrighterStarsCollection(ObjectCollection):
     def load_collection(region, sky_catalog, mjd=None, **kwds):
         object_type = BrighterStarsCollection._object_type
         config = dict(sky_catalog.raw_config["object_types"][object_type])
-        collection_list = sky_catalog.get_object_type_by_region(region, "star")
-        return BrighterStarsCollection(collection_list, config['delta_magnorm'])
+        object_list = sky_catalog.get_object_type_by_region(region, "star")
+        return BrighterStarsCollection(object_list, config['delta_magnorm'])
